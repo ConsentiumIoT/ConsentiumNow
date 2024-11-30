@@ -3,6 +3,7 @@
 
 #include <esp_now.h>
 #include <WiFi.h>
+#include <esp_wifi.h>
 
 template <typename DataType>
 class ConsentiumNow {
@@ -15,7 +16,8 @@ public:
     ConsentiumNow();                  // Constructor
     void receiveBegin();              // Initialize ESP-NOW for receiving
     void sendBegin(const uint8_t *peerMac); // Initialize ESP-NOW for sending
-
+    bool addPeer(const uint8_t *);
+    void readMacAddress();
     static bool isDataAvailable();    // Check if new data is available
     static DataType getReceivedData();// Retrieve received data
     void sendData(const DataType &data); // Send data to a predefined peer

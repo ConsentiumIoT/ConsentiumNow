@@ -11,6 +11,23 @@ bool ConsentiumNow<DataType>::dataAvailable = false;
 template <typename DataType>
 ConsentiumNow<DataType>::ConsentiumNow() {}
 
+template <typename DataType>
+void ConsentiumNow<DataType>::readMacAddress(){
+  WiFi.mode(WIFI_STA);
+  WiFi.STA.begin();
+  uint8_t baseMac[6];
+  esp_err_t ret = esp_wifi_get_mac(WIFI_IF_STA, baseMac);
+  if (ret == ESP_OK) {
+    Serial.println("[DEFAULT] ESP32 Board MAC Address: ");
+    Serial.printf("%02x:%02x:%02x:%02x:%02x:%02x\n",
+                  baseMac[0], baseMac[1], baseMac[2],
+                  baseMac[3], baseMac[4], baseMac[5]);
+    Serial.println();
+  } else {
+    Serial.println("Failed to read MAC address");
+  }
+}
+
 // Initialize ESP-NOW for receiving
 template <typename DataType>
 void ConsentiumNow<DataType>::receiveBegin() {
@@ -25,6 +42,31 @@ void ConsentiumNow<DataType>::receiveBegin() {
     esp_now_register_recv_cb(onDataReceive);
 
     Serial.println("ESP-NOW initialized for receiving.");
+}
+
+// Add a peer to the ESP-NOW network
+template <typename DataType>
+bool ConsentiumNow<DataType>::addPeer(const uint8_t *macAddress) {
+        esp_now_peer_info_t peerInfo;
+        memset(&peerInfo, 0, sizeof(esp_now_peer_info_t));
+
+        // Set the peer's MAC address
+        memcpy(peerInfo.peer_addr, macAddress, 6);
+
+        // Set WiFi channel (0 for auto, or specify channel explicitly)
+        peerInfo.channel = 0;
+
+        // Set encryption (false for no encryption)
+        peerInfo.encrypt = false;
+
+        // Add the peer
+        if (esp_now_add_peer(&peerInfo) != ESP_OK) {
+            Serial.println("Failed to add peer");
+            return false;
+        }
+
+        Serial.println("Peer added successfully");
+        return true;
 }
 
 // Initialize ESP-NOW for sending
