@@ -28,34 +28,32 @@ struct SensorData {
     float humidity;
 };
 
-ConsentiumNow<SensorData> consentiumReceiver;
+ConsentiumNow<SensorData> consentiumSender;
+
+// Replace with the receiver's MAC address
+uint8_t receiverMac[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00}; 
 
 void setup() {
     Serial.begin(115200);
 
-    // Initialize ESP-NOW for receiving
-    consentiumReceiver.receiveBegin();
+    // Initialize ESP-NOW for sending
+    consentiumSender.sendBegin(receiverMac);
 
-    // Add the MAC addresses of the expected sender boards
-    uint8_t sender1Mac[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00}; 
-    uint8_t sender2Mac[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-    
-    consentiumReceiver.addPeer(sender1Mac);
-    consentiumReceiver.addPeer(sender2Mac);
-
-    Serial.println("Receiver ready to receive data from multiple senders.");
+    Serial.println("Sender initialized.");
 }
 
 void loop() {
-    // Check if new data is available
-    if (consentiumReceiver.isDataAvailable()) {
-        // Retrieve the received data
-        SensorData data = consentiumReceiver.getReceivedData();
+    // Prepare sensor data
+    SensorData data;
+    data.temperature = random(200, 300) / 10.0; // Simulated temperature (20.0 - 30.0)
+    data.humidity = random(400, 600) / 10.0;    // Simulated humidity (40.0 - 60.0)
 
-        // Print the received data
-        Serial.printf("Received Data - Temperature: %.2f, Humidity: %.2f\n",
-                      data.temperature, data.humidity);
-    }
+    // Send data
+    consentiumSender.sendData(data);
 
-    delay(500); // Add a short delay for stability
+    // Print sent data
+    Serial.printf("Sent Data - Temperature: %.2f, Humidity: %.2f\n",
+                  data.temperature, data.humidity);
+
+    delay(2000); // Send data every 2 seconds
 }

@@ -38,6 +38,10 @@ void setup() {
 
     // Initialize ESP-NOW communication
     consentiumNow.receiveBegin();
+
+    // Prints host MAC address
+    consentiumNow.readMacAddress();
+
     Serial.println("Waiting for data...");
 }
 

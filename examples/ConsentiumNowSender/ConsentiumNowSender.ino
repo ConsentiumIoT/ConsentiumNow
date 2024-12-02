@@ -1,3 +1,25 @@
+/***************************************************
+  Consentium IoT - ConsentiumNow Library
+  -------------------------------------------------
+  This library enables seamless ESP-NOW communication 
+  between ESP32-compatible devices. Designed for use 
+  with Consentium IoT solutions, it supports custom 
+  data structures and reliable data transfer.
+
+  Features:
+  - Lightweight and flexible ESP-NOW integration
+  - Support for custom user-defined data structures
+  - Efficient communication protocol for IoT applications
+
+  Tutorials and Documentation:
+  Visit us at: https://docs.consentiumiot.com
+
+  For Support:
+  Email: official@consentiumiot.com
+
+  MIT license - Redistribution must include this header.
+ ***************************************************/
+
 #include <ConsentiumNow.h>
 
 // Define the custom data structure
