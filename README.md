@@ -1,83 +1,139 @@
-# ConsentiumThingsDalton
+# ConsentiumNow Library for ESP-NOW Communication
 
-**Version:** v2.1.2  
-
-**Description:**  
-The **ConsentiumThingsDalton** project demonstrates how to use the ConsentiumThings IoT board to read sensor data and transmit it over HTTPS to the ConsentiumThings cloud. This library supports **ESP32**, **ESP8266**, and **Raspberry Pi Pico W** edge devices.
-
----
-
-## How to Use
-
-1. **Clone the Repository**: Clone this repository to your local machine.
-2. **Set Up Arduino IDE**:
-   - Install the [Arduino IDE](https://www.arduino.cc/en/software).
-   - Install the necessary board support packages for ESP32, ESP8266, or Raspberry Pi Pico W.
-3. **Connect the Board**: Connect your **ConsentiumThingsDalton** board to your computer via USB.
-4. **Load the Code**:
-   - Open the Arduino IDE and load the `ThingsUpdate.ino` file.
-   - Enter the following in the provided variables:
-     - **WiFi SSID** and **password** in the `ssid` and `pass` variables.
-     - **ConsentiumThings API key** in the `ApiKey` variable.
-     - **ConsentiumThings board API key** in the `BoardApiKey` variable.
-5. **Upload the Code**: Compile and upload the code to the **ConsentiumThingsDalton** board.
-6. **Monitor Activity**:
-   - The board will begin reading sensor data and transmitting it over REST to the **ConsentiumThings cloud** every 7 seconds by default.
+The **ConsentiumNow** library provides seamless and efficient ESP-NOW communication between ESP32-compatible devices. It is designed for Consentium IoT solutions, enabling reliable data exchange using custom data structures.
 
 ---
 
 ## Features
 
-- **Customizable Sampling Interval**:  
-   Adjust the sampling interval by modifying the `interval` variable.
-   
-- **Data Precision Control**:  
-   Set the precision of REST data transmission by updating the `pre` variable.
-
-- **Add Sensors**:  
-   Connect additional sensors to supported pins. Update:
-   - `sensorValues` array with new sensor readings.
-   - `sensorInfo` array with new sensor descriptions.
-   - `sensorCount` variable to match the number of connected sensors.
-
-- **REST Event LED Indication**:  
-   Connect an LED to the following pins for visual REST event feedback:
-   - **GPIO 16** for ESP8266  
-   - **GPIO 23** for ESP32  
-   - **GPIO 25** for Raspberry Pi Pico W  
+- Lightweight and flexible ESP-NOW integration.
+- Support for user-defined custom data structures.
+- Efficient communication for IoT applications.
+- Easy-to-use API for both sending and receiving data.
 
 ---
 
-## Notes
+## Getting Started
 
-- Ensure secure transmission by using HTTPS endpoints for ConsentiumThings cloud communication.
-- You can view the logs and debug information using the Serial Monitor in the Arduino IDE (set baud rate to **115200**).
+### Prerequisites
+
+- ESP32-compatible board.
+- Arduino IDE installed and configured for ESP32 development.
+- Basic knowledge of ESP-NOW communication protocol.
+
+---
+
+### Installation
+
+1. Clone or download this repository to your local machine.
+2. Include the `ConsentiumNow` library in your Arduino IDE.
+   - Go to **Sketch > Include Library > Add .ZIP Library**.
+   - Select the downloaded `ConsentiumNow` library.
+
+---
+
+## Usage
+
+### 1. Sender Example
+
+```cpp
+#include <ConsentiumNow.h>
+
+// Define the data structure
+struct SensorData {
+    float temperature;
+    float humidity;
+};
+
+// Create an instance of ConsentiumNow for the custom structure
+ConsentiumNow<SensorData> consentiumSender;
+
+// Replace with the receiver's MAC address
+uint8_t receiverMac[] = {0x7C, 0x9E, 0xBD, 0x66, 0x7A, 0x0C}; 
+
+void setup() {
+    Serial.begin(115200);
+    consentiumSender.sendBegin(receiverMac);
+    Serial.println("Sender initialized.");
+}
+
+void loop() {
+    SensorData data;
+    data.temperature = random(200, 300) / 10.0; // Random temperature (20.0 - 30.0°C)
+    data.humidity = random(400, 600) / 10.0;    // Random humidity (40.0 - 60.0%)
+
+    consentiumSender.sendData(data);
+    Serial.printf("Sent Data - Temperature: %.2f, Humidity: %.2f\n", 
+                  data.temperature, data.humidity);
+    delay(2000);
+}
+```
+
+---
+
+### 2. Receiver Example
+
+```cpp
+#include <ConsentiumNow.h>
+
+// Define the data structure
+struct SensorData {
+    float temperature;
+    float humidity;
+};
+
+// Create an instance of ConsentiumNow for receiving data
+ConsentiumNow<SensorData> consentiumReceiver;
+
+void setup() {
+    Serial.begin(115200);
+    consentiumReceiver.receiveBegin();
+    Serial.println("Receiver initialized and ready.");
+}
+
+void loop() {
+    if (consentiumReceiver.isDataAvailable()) {
+        SensorData data = consentiumReceiver.getReceivedData();
+        Serial.printf("Received Data - Temperature: %.2f, Humidity: %.2f\n", 
+                      data.temperature, data.humidity);
+    }
+    delay(500);
+}
+```
+
+---
+
+## Advanced Examples
+
+### Multi-Sender to One Receiver
+
+- Configure multiple senders and their respective MAC addresses in the receiver.
+
+### Custom Data Structures
+
+- Modify the `struct` definitions to fit your application (e.g., adding new fields).
+
+### Debugging
+
+Use `Serial` outputs to monitor the transmission and reception status.
+
+---
+
+## Documentation and Support
+
+- Tutorials and detailed documentation: [Consentium IoT Docs](https://docs.consentiumiot.com)
+- For inquiries or support, email: [official@consentiumiot.com](mailto:official@consentiumiot.com)
 
 ---
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).  
-
-[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+This project is licensed under the MIT License. Redistribution must include the license header. For details, refer to the `LICENSE` file.
 
 ---
 
-## Contributing
+## Acknowledgments
 
-Contributions are welcome!  
-To contribute:
-- Fork the repository.
-- Submit a pull request with a clear description of changes.  
-For significant changes, open an issue first to discuss your ideas.  
+Thanks to the Consentium IoT community for their contributions and feedback.
 
----
-
-## Licensing and Credits
-
-This project leverages open-source tools and libraries:
-- **Arduino IDE and ArduinoCore-API**: Developed by the Arduino team ([GPL License](https://arduino.cc)).
-- **RP2040 GCC-based Toolchain**: By Earle Philhower ([GPL License](https://github.com/earlephilhower/pico-quick-toolchain)).
-- **Pico-SDK**: By Raspberry Pi (Trading) Ltd ([BSD 3-Clause License](https://github.com/raspberrypi/pico-sdk)).
-- **ESP8266 Libraries**: Modified from ESP8266 Core Development Team ([GitHub](https://github.com/esp8266/Arduino)).
-- **ESP32 Libraries**: Developed by Espressif Systems ([GitHub](https://github.com/espressif/arduino-esp32)).
+Happy coding with ConsentiumNow! 🚀
